@@ -37,6 +37,13 @@ func (s *Server) routes() *http.ServeMux {
 	mux.HandleFunc("GET /tokens.css", s.handleTokensCSS)
 	mux.HandleFunc("GET /home.css", s.handleHomeCSS)
 	mux.HandleFunc("GET /home.js", s.handleHomeJS)
+	mux.HandleFunc("GET /admin", s.handleAdminPage)
+	mux.HandleFunc("GET /admin/{$}", s.handleAdminPage)
+	mux.HandleFunc("GET /admin.css", s.handleAdminCSS)
+	mux.HandleFunc("GET /admin.js", s.handleAdminJS)
+	mux.HandleFunc("GET /api/admin/overview", s.requireRootAdmin(s.handleAdminOverview))
+	mux.HandleFunc("GET /api/admin/files", s.requireRootAdmin(s.handleAdminFiles))
+	mux.HandleFunc("DELETE /api/admin/files/{id}", s.requireRootAdmin(s.handleAdminDeleteFile))
 	mux.HandleFunc("GET /", s.handleRoot)
 	// Legacy single-tenant routes, backed by the JWT_SECRET env var.
 	mux.HandleFunc("POST /api/tokens", s.handleMintToken)
@@ -88,7 +95,7 @@ func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleRobots(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	_, _ = io.WriteString(w, "User-agent: *\nAllow: /$\nDisallow: /f/\nDisallow: /t/\nDisallow: /upload\nDisallow: /api/\nDisallow: /healthz\n")
+	_, _ = io.WriteString(w, "User-agent: *\nAllow: /$\nDisallow: /admin\nDisallow: /f/\nDisallow: /t/\nDisallow: /upload\nDisallow: /api/\nDisallow: /healthz\n")
 }
 
 func (s *Server) handleFavicon(w http.ResponseWriter, _ *http.Request) {
@@ -249,6 +256,7 @@ const homePage = `<!doctype html>
     </div>
     <div class="footer__meta shell">
       <span>hoard.sharath.page · personal infrastructure · MIT</span>
+      <a href="/admin">Admin dashboard</a>
       <a href="/healthz">Service status</a>
     </div>
   </footer>
@@ -268,6 +276,7 @@ const homePage = `<!doctype html>
       <a class="palette__item" href="https://github.com/tnfssc/hoard.sharath.page#security-model"><span>Security model</span><span>README ↗</span></a>
       <a class="palette__item" href="https://github.com/tnfssc/hoard.sharath.page/blob/main/LICENSE"><span>MIT license</span><span>GitHub ↗</span></a>
       <p class="palette__group">Service</p>
+      <a class="palette__item" href="/admin"><span>Admin dashboard</span><span>Local</span></a>
       <a class="palette__item" href="/healthz"><span>Service status</span><span>Local</span></a>
       <p class="palette__empty" id="command-empty" hidden>No matching destination.</p>
     </div>
@@ -381,6 +390,7 @@ func (s *Server) handleMintTenantToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) mintToken(w http.ResponseWriter, r *http.Request, secret []byte) {
+	w.Header().Set("Cache-Control", "no-store")
 	var req struct {
 		Name string `json:"name"`
 		Days int    `json:"days"`
@@ -414,6 +424,7 @@ func (s *Server) isRootAdmin(r *http.Request) bool {
 
 func (s *Server) requireRootAdmin(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
 		if !s.isRootAdmin(r) {
 			writeErr(w, http.StatusUnauthorized, "bad admin token")
 			return

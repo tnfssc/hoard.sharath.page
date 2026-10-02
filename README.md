@@ -24,6 +24,7 @@ The service is multitenant: each tenant gets an isolated namespace under `/t/<te
 - Keeps dependencies to zero runtime Go modules: standard library only
 - Runs as a single distroless Docker image
 - Includes a tiny `hoard-upload` CLI wrapper for remote machines and agents
+- Includes a root-admin dashboard at `/admin` for tenants, files, and upload tokens
 
 ## Quick Start
 
@@ -85,6 +86,22 @@ Configuration is environment-based.
 | `SWEEP_INTERVAL` | `1m` | Expiry janitor interval |
 
 Durations accept Go duration strings like `30m`, `12h`, `72h`, plus day strings like `3d`.
+
+## Admin Dashboard
+
+Open `/admin` and sign in with the server's `ADMIN_TOKEN`. The dashboard lets the root admin:
+
+- See active file counts, stored bytes, and files expiring within 24 hours
+- Search files by filename, uploader, ID, or tenant; filter by tenant and copy public links
+- Permanently delete individual files, with a typed confirmation
+- Create tenants with optional limits, save their generated secrets, and delete tenants
+- Create upload tokens for tenants or the enabled legacy space
+
+The admin token stays in the current tab's memory; it is not saved to browser storage or cookies. Reloading or signing out clears it. Tenant admin tokens cannot access this dashboard. Use HTTPS when accessing it remotely.
+
+The overview counts completed, unexpired uploads. It does not include expired files awaiting cleanup or uploads still in progress. Tokens are stateless JWTs, so there is no token inventory or individual revocation.
+
+Root-authenticated file APIs use `X-Admin-Token`: `GET /api/admin/overview`, `GET /api/admin/files` (optional `tenant`, `q`, `limit` from 1–100, and nonnegative `offset`), and `DELETE /api/admin/files/<id>?tenant=<name>`. An omitted tenant lists every space; an explicitly empty tenant selects the enabled legacy space. Deletion always requires an explicit tenant.
 
 ## Tenants
 

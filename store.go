@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -179,6 +180,52 @@ func (s *Store) BlobPath(tenant, id string) string {
 
 func (s *Store) Delete(tenant, id string) {
 	_ = os.RemoveAll(filepath.Join(s.tenantDir(tenant), id))
+}
+
+// List returns completed, unexpired uploads, newest first. An upload without
+// metadata is still in progress; expiry and deletion can race with this scan.
+func (s *Store) List(tenant string, now time.Time) ([]Meta, error) {
+	entries, err := os.ReadDir(s.tenantDir(tenant))
+	if errors.Is(err, fs.ErrNotExist) {
+		return []Meta{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	files := make([]Meta, 0)
+	for _, e := range entries {
+		if !e.IsDir() || !validID(e.Name()) {
+			continue
+		}
+		m, err := s.Load(tenant, e.Name())
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		if m.Expired(now) {
+			continue
+		}
+		m.ID = e.Name()
+		files = append(files, *m)
+	}
+	sort.Slice(files, func(i, j int) bool {
+		if files[i].UploadedAt.Equal(files[j].UploadedAt) {
+			return files[i].ID < files[j].ID
+		}
+		return files[i].UploadedAt.After(files[j].UploadedAt)
+	})
+	return files, nil
+}
+
+// DeleteFile reports filesystem failures so the dashboard can show a failed
+// deletion rather than silently removing the row from its view.
+func (s *Store) DeleteFile(tenant, id string) error {
+	if !validID(id) || (tenant != legacyTenant && !validTenantName(tenant)) {
+		return errors.New("invalid file path")
+	}
+	return os.RemoveAll(filepath.Join(s.tenantDir(tenant), id))
 }
 
 // DeleteTenant removes all of a tenant's files.

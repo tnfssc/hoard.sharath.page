@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin · Hoard</title>
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/admin.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#login-heading">Skip to content</a>
+  <section class="login" id="login" role="main" aria-labelledby="login-heading">
+    <a class="brand" href="/"><img src="/logo.png" alt="" width="44" height="44">hoard<span class="badge">admin</span></a>
+    <div class="login-card">
+      <span class="login-mark" aria-hidden="true">↳</span>
+      <h1 id="login-heading" tabindex="-1">A place for<br>everything temporary.</h1>
+      <p>Manage your files, tenants, and upload tokens.</p>
+      <form id="login-form">
+        <label for="admin-token">Root admin token</label>
+        <input id="admin-token" type="password" autocomplete="off" spellcheck="false" required aria-describedby="login-help login-error">
+        <p class="helper" id="login-help">Use the ADMIN_TOKEN configured on your server.</p>
+        <p class="form-error" id="login-error" role="alert"></p>
+        <button class="button primary" type="submit">Open dashboard <span aria-hidden="true">↗</span></button>
+      </form>
+      <p class="login-footnote">Your token stays in this tab’s memory. Reloading or signing out clears it.</p>
+    </div>
+    <a class="back-link" href="/">← Back to Hoard</a>
+  </section>
+
+  <div class="app" id="app" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="/"><img src="/logo.png" alt="" width="36" height="36">hoard</a>
+      <p class="sidebar-label">Your admin space</p>
+      <nav aria-label="Dashboard">
+        <a class="nav-link" href="#files" data-view="files" aria-current="page"><span aria-hidden="true">▤</span>Files<span class="nav-count" id="nav-count">—</span></a>
+        <a class="nav-link" href="#tenants" data-view="tenants"><span aria-hidden="true">▦</span>Tenants</a>
+        <a class="nav-link" href="#tokens" data-view="tokens"><span aria-hidden="true">⚿</span>Upload tokens</a>
+      </nav>
+      <div class="sidebar-bottom">
+        <p><span class="connection-dot" aria-hidden="true"></span>Admin connected</p>
+        <button class="button subtle" id="sign-out" type="button">Sign out <span aria-hidden="true">↪</span></button>
+      </div>
+    </aside>
+
+    <main id="main" tabindex="-1">
+      <header class="topbar"><p>Admin <span aria-hidden="true">/</span> <span id="breadcrumb">Files</span></p><button class="button subtle" id="refresh" type="button">↻ Refresh</button></header>
+      <div class="workspace">
+        <div class="intro"><div><h1>Your hoard, in order.</h1><p>Keep an eye on what’s here. Let expiry handle the rest.</p></div><span class="badge root-badge">Root admin</span></div>
+        <dl class="stats" aria-label="Storage overview">
+          <div><dt>Active files</dt><dd id="stat-files">—</dd></div>
+          <div><dt>Stored</dt><dd id="stat-bytes">—</dd></div>
+          <div><dt>Tenants</dt><dd id="stat-tenants">—</dd></div>
+          <div><dt>Expiring in 24h</dt><dd id="stat-expiring">—</dd></div>
+        </dl>
+        <p class="notice" id="notice" role="status" aria-live="polite" hidden></p>
+
+        <section class="view" id="view-files" aria-labelledby="files-heading">
+          <div class="section-head"><div><h2 id="files-heading">Files</h2><p id="files-summary" aria-live="polite">Loading your files…</p></div><button class="button primary" type="button" data-action="mint">Create token <span aria-hidden="true">+</span></button></div>
+          <form class="filters" id="filters" role="search">
+            <div class="search-field"><label class="sr-only" for="file-search">Search files</label><span aria-hidden="true">⌕</span><input id="file-search" type="search" placeholder="Search filename, uploader, or ID" autocomplete="off"></div>
+            <div class="tenant-filter"><label class="sr-only" for="file-tenant">Filter by tenant</label><select id="file-tenant"><option value="*">All tenants</option></select></div>
+          </form>
+          <div class="file-table" id="file-table" aria-busy="true">
+            <div class="table-head" aria-hidden="true"><span>File</span><span>Tenant / uploader</span><span>Size</span><span>Expires</span><span>Actions</span></div>
+            <div id="file-list"></div>
+          </div>
+          <div class="empty-state" id="files-empty" hidden><span class="empty-mark" aria-hidden="true">▤</span><h3 id="empty-heading">Room for something new.</h3><p id="empty-copy">Files appear here after your first upload.</p><button class="button" type="button" id="empty-action">Create token</button></div>
+          <div class="pagination" id="pagination" hidden><p id="page-label" aria-live="polite"></p><div><button class="button" id="previous" type="button">← Previous</button><button class="button" id="next" type="button">Next →</button></div></div>
+        </section>
+
+        <section class="view" id="view-tenants" aria-labelledby="tenants-heading" hidden>
+          <div class="section-head"><div><h2 id="tenants-heading">Tenants</h2><p>Separate spaces. Separate keys. The same little Hoard.</p></div><button class="button primary" id="new-tenant" type="button">New tenant <span aria-hidden="true">+</span></button></div>
+          <div id="tenant-list" class="tenant-list"></div>
+          <div class="empty-state" id="tenants-empty" hidden><span class="empty-mark" aria-hidden="true">▦</span><h3>A space of your own.</h3><p>Create a tenant for your team, agent, or project.</p><button class="button" type="button" data-action="new-tenant">New tenant</button></div>
+        </section>
+
+        <section class="view" id="view-tokens" aria-labelledby="tokens-heading" hidden>
+          <div class="section-head"><div><h2 id="tokens-heading">Upload tokens</h2><p>A key for each agent or machine that sends files here.</p></div></div>
+          <div class="token-layout">
+            <form class="form-panel" id="token-form">
+              <label for="token-tenant">Tenant</label><select id="token-tenant" required></select>
+              <label for="token-name">Token name</label><input id="token-name" name="name" placeholder="laptop, ci-agent, screen-recorder" maxlength="100" required>
+              <label for="token-days">Valid for (days)</label><input id="token-days" type="number" min="1" max="3650" value="30" required>
+              <p class="helper">Choose the shortest lifetime that works for you.</p>
+              <p class="form-error" id="token-error" role="alert"></p>
+              <button class="button primary" type="submit">Create upload token ↗</button>
+            </form>
+            <aside class="token-note"><span class="badge">A small reminder</span><h3>Keys are for uploading.<br>Links are for sharing.</h3><p>Upload tokens grant access to one tenant. Anyone with a file’s public link can view it until it expires.</p><p>Tokens are not stored in a list and cannot be revoked individually. Keep them private and give each one a useful name.</p><p id="token-no-tenants" hidden>Create a tenant first to make an upload token.</p></aside>
+          </div>
+        </section>
+
+        <footer class="workspace-footer"><p>Temporary files. A little less clutter.</p><p id="last-updated">—</p></footer>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="tenant-dialog" aria-labelledby="tenant-dialog-heading">
+    <form id="tenant-form">
+      <div class="dialog-head"><h2 id="tenant-dialog-heading">Make a little space.</h2><button class="close-button" type="button" data-close aria-label="Close">×</button></div>
+      <p>Each tenant gets its own upload keys and files.</p>
+      <label for="tenant-name">Tenant name</label><input id="tenant-name" pattern="[a-z0-9]([a-z0-9-]*[a-z0-9])?" maxlength="32" placeholder="my-team" required aria-describedby="tenant-name-help">
+      <p class="helper" id="tenant-name-help">Lowercase letters, numbers, and dashes. Up to 32 characters.</p>
+      <div class="form-columns"><div><label for="tenant-ttl">Default lifetime</label><input id="tenant-ttl" placeholder="72h"></div><div><label for="tenant-max-ttl">Maximum lifetime</label><input id="tenant-max-ttl" placeholder="7d"></div></div>
+      <label for="tenant-max-size">Maximum upload (MiB)</label><input id="tenant-max-size" type="number" min="1" max="8796093022207" placeholder="Inherit server limit">
+      <p class="helper" id="tenant-defaults">Leave limits empty to use the server defaults.</p>
+      <p class="form-error" id="tenant-error" role="alert"></p>
+      <div class="dialog-actions"><button class="button" type="button" data-close>Cancel</button><button class="button primary" type="submit">Create tenant</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="secret-dialog" aria-labelledby="secret-heading">
+    <div class="dialog-head"><h2 id="secret-heading">Save your key.</h2><button class="close-button" type="button" data-close aria-label="Close">×</button></div>
+    <p id="secret-description">Copy this before closing. It won’t be shown again.</p>
+    <div id="secret-values"></div>
+    <p class="form-error" id="secret-error" role="alert"></p>
+    <div class="dialog-actions"><button class="button primary" type="button" data-close>Saved, close</button></div>
+  </dialog>
+
+  <dialog id="delete-dialog" aria-labelledby="delete-heading">
+    <form id="delete-form">
+      <div class="dialog-head"><h2 id="delete-heading">Delete file?</h2><button class="close-button" type="button" data-close aria-label="Close">×</button></div>
+      <p id="delete-description"></p>
+      <label for="delete-confirm" id="delete-label">Type the file ID to confirm</label><input id="delete-confirm" autocomplete="off" required aria-describedby="delete-error">
+      <p class="form-error" id="delete-error" role="alert"></p>
+      <div class="dialog-actions"><button class="button" type="button" data-close>Keep it</button><button class="button danger" type="submit">Delete permanently</button></div>
+    </form>
+  </dialog>
+  <noscript><p class="noscript">Enable JavaScript to use the admin dashboard.</p></noscript>
+</body>
+</html>
