@@ -17,7 +17,7 @@ SSH works with the current key. The remote login shell is fish. Use `bash -s` fo
 - `docker compose up -d --no-deps --wait --wait-timeout 120 hoard` completed. Container health is healthy.
 - `docker exec host-hoard-1 /hoard healthcheck` passed.
 - Public `https://hoard.sharath.page/healthz` and `/admin` returned 200.
-- Both regular logo URLs and cache-busted URLs returned 200 and matched source SHA-256 hashes.
+- Both regular logo URLs and cache-busted URLs returned 200 and matched source SHA-256 hashes. That proved the server served new bytes, not that existing browsers refreshed a same-URL cached image. The homepage has no explicit cache policy and admin is no-store; both now use hash-versioned logo and favicon URLs. PNG routes and assets remain unchanged.
 - Logo: `4ce7e1fd76960e2745554b8303573b3cda18c22270aab7c28fec9572f5d74d0f`.
 - Favicon: `5900bb82a4e378edaddc71b6e929de84481b19eab15077bf3c513f8984526887`.
 
