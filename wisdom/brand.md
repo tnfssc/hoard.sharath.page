@@ -34,3 +34,5 @@ Worker checkout: `/home/tnfssc/.bruv/worktrees/t3code-b3a275a7-3c93fe2dfab8-task
 The logo was later merged and deployed to minipc. See [deployment notes](deployment.md) for the live revision, checks, and rollback.
 
 Cache fix worker: `/home/tnfssc/.bruv/worktrees/t3code-b3a275a7-3c93fe2dfab8-task_b3387e63`, branch `bruv/fix-stale-brand-image-urls-b3387e63`. The screenshot caught a real gap in our first deployment check.
+
+The cache fix is deployed. Both public pages use the versioned URLs and those assets match the new mark. On future logo edits, refresh the URL hash prefixes and the focused test along with the PNG exports. The PNG cache lifetime is seven days.
