@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Hoard</title>
+  <desc id="desc">A cream H made from storage uprights and a connecting shelf, with a golden folded-file corner on a graphite tile.</desc>
+  <!-- sRGB equivalents of tokens.css: ink, paper, accent (accent clipped to gamut). -->
+  <rect width="64" height="64" rx="14" fill="#12171b"/>
+  <path d="M12 12H24V26H40V12H44L52 20V52H40V38H24V52H12Z" fill="#f7f5ec"/>
+  <path d="M44 12V20H52Z" fill="#f6ce00"/>
+</svg>
