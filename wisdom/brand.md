@@ -23,7 +23,7 @@ Install the development tool `rsvg-convert` first (Debian/Ubuntu: `librsvg2-bin`
 - Confirmed PNG dimensions and transparency. Regenerated twice and checked SHA-256 hashes: identical on the tool versions above.
 - `go test ./...` passed, including existing embedded brand-asset route tests. `go vet ./...` passed.
 
-No known design blockers. Raster bytes may differ with other librsvg/Cairo versions. Browsers may retain an old cached favicon until refreshed; no cache or route behavior was changed.
+No known design blockers. Raster bytes may differ with other librsvg/Cairo versions. Browsers can keep an old image at the same URL even after server bytes change. Homepage and admin references now use hash-versioned URLs (/logo.png?v=4ce7e1fd, /favicon.png?v=5900bb82) so browsers request fresh images. PNG routes and bytes are unchanged. The homepage has no explicit cache policy; admin is no-store. Public hash checks prove the server has new bytes, not that existing browser caches fetched them.
 
 ## Handoff
 
@@ -32,3 +32,5 @@ The parent reviewed the exported mark and fresh 16px and 32px renders, then brou
 Worker checkout: `/home/tnfssc/.bruv/worktrees/t3code-b3a275a7-3c93fe2dfab8-task_db807ba3`, branch `bruv/redesign-hoard-logo-db807ba3`. Browser preview tools were off for this thread, so no in-page screenshot was taken. The local test preview was stopped after review.
 
 The logo was later merged and deployed to minipc. See [deployment notes](deployment.md) for the live revision, checks, and rollback.
+
+Cache fix worker: `/home/tnfssc/.bruv/worktrees/t3code-b3a275a7-3c93fe2dfab8-task_b3387e63`, branch `bruv/fix-stale-brand-image-urls-b3387e63`. The screenshot caught a real gap in our first deployment check.

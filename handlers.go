@@ -153,7 +153,7 @@ const homePage = `<!doctype html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="description" content="A small self-hosted temporary file host for agent artifacts, recordings, logs, and reports.">
-  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="icon" href="/favicon.png?v=5900bb82" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -164,7 +164,7 @@ const homePage = `<!doctype html>
   <header class="nav">
     <div class="nav__inner shell">
       <a class="brand" href="/" aria-label="hoard.sharath.page home">
-        <img class="brand__logo" src="/logo.png" width="32" height="32" alt="">
+        <img class="brand__logo" src="/logo.png?v=4ce7e1fd" width="32" height="32" alt="">
         <span>hoard</span><span class="brand__suffix">/ sharath.page</span>
       </a>
       <button class="search-trigger" id="command-trigger" type="button" aria-haspopup="dialog" aria-controls="command-palette">

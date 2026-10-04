@@ -24,6 +24,30 @@ func TestHomePage(t *testing.T) {
 	}
 }
 
+func TestVersionedBrandReferences(t *testing.T) {
+	for _, page := range []struct{ name, path, cache string }{
+		{name: "home", path: "/"},
+		{name: "admin", path: "/admin", cache: "no-store"},
+	} {
+		t.Run(page.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, page.path, nil)
+			rec := httptest.NewRecorder()
+			(&Server{}).routes().ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("status = %d, want 200", rec.Code)
+			}
+			for _, ref := range []string{"/logo.png?v=4ce7e1fd", "/favicon.png?v=5900bb82"} {
+				if !strings.Contains(rec.Body.String(), ref) {
+					t.Errorf("page missing versioned brand reference %q", ref)
+				}
+			}
+			if page.cache != "" && rec.Header().Get("Cache-Control") != page.cache {
+				t.Errorf("Cache-Control = %q, want %q", rec.Header().Get("Cache-Control"), page.cache)
+			}
+		})
+	}
+}
+
 func TestHomeAssets(t *testing.T) {
 	wants := map[string]string{
 		"/tokens.css": "text/css",
