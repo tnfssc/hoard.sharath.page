@@ -32,3 +32,5 @@ The parent reviewed the exported mark and fresh 16px and 32px renders, then brou
 Worker checkout: `/home/tnfssc/.bruv/worktrees/t3code-b3a275a7-3c93fe2dfab8-task_db807ba3`, branch `bruv/redesign-hoard-logo-db807ba3`. Browser preview tools were off for this thread, so no in-page screenshot was taken. The local test preview was stopped after review.
 
 The logo was later merged and deployed to minipc. See [deployment notes](deployment.md) for the live revision, checks, and rollback.
+
+Cache fix worker: `/home/tnfssc/.bruv/worktrees/t3code-b3a275a7-3c93fe2dfab8-task_b3387e63`, branch `bruv/fix-stale-brand-image-urls-b3387e63`. The screenshot caught a real gap in our first deployment check.
